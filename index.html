@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Supremacy — World War</title><style>
+:root{--bg:#101820;--panel:#1b2935;--panel2:#243544;--gold:#d4ad62;--text:#e9edf0;--muted:#9eabb5;--line:#3a4b58;--red:#b64b45;--green:#4c9b76}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Arial,sans-serif}button,input,select{font:inherit}button{background:#304657;border:1px solid #536a7b;color:white;padding:10px 13px;border-radius:5px;cursor:pointer}button:hover{filter:brightness(1.15)}button.primary{background:#9d7839;border-color:#d4ad62;color:#fff}button.danger{background:#8c3834;border-color:#bd625c}.hidden{display:none!important}.top{height:58px;background:#17232d;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:5}.brand{font-weight:bold;letter-spacing:2px;color:var(--gold)}.wrap{max-width:1400px;margin:auto;padding:22px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:17px;margin-bottom:15px}.hero{max-width:680px;margin:7vh auto}.hero h1{font-size:30px;color:var(--gold);letter-spacing:2px}.muted{color:var(--muted)}input,select{background:#101a22;color:white;border:1px solid var(--line);border-radius:5px;padding:11px;width:100%;margin:5px 0 12px}.row{display:flex;gap:12px;flex-wrap:wrap}.row>*{flex:1}.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:15px}
+.map-world{position:relative;width:100%;aspect-ratio:2/1;background:radial-gradient(ellipse at 50% 40%,#16303e 0%,#0d1f2a 70%);border-radius:7px;overflow:hidden;border:1px solid var(--line)}.prov{position:absolute;width:13px;height:13px;border-radius:50%;border:1px solid rgba(255,255,255,.45);cursor:pointer;padding:0;transform:translate(-50%,-50%)}.prov:hover{z-index:3;transform:translate(-50%,-50%) scale(1.6)}.prov.selected{outline:3px solid var(--gold);z-index:2;transform:translate(-50%,-50%) scale(1.5)}.prov-src{box-shadow:0 0 0 2px var(--gold)}.prov-dst{box-shadow:0 0 0 2px #e07b5a}
+.nation{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid var(--line);align-items:center}.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px}.statgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.stat{background:var(--panel2);padding:10px;border-radius:5px}.stat b{display:block;color:var(--gold);font-size:16px}.log{max-height:200px;overflow:auto;font-size:12px;color:var(--muted)}.log div{padding:5px 0;border-bottom:1px solid var(--line)}.admin{border:1px solid #b64b45}.admin h3{color:#ef8d85}.tag{display:inline-block;background:#334b5c;border-radius:20px;padding:4px 8px;font-size:11px;color:#d9e3ea}.small{font-size:12px}.invite{background:#101a22;padding:10px;border-radius:5px;word-break:break-all;color:#e5c27e}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:18px}.side{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:17px;text-align:left}.side h3{margin-top:4px}.side.creator{border-top:3px solid var(--gold)}.side.joiner{border-top:3px solid var(--green)}.rolechip{display:inline-block;font-size:11px;letter-spacing:2px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:4px 10px;margin-bottom:8px}.cheatrow{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#101a22;border:1px solid var(--line);border-radius:5px;padding:11px;margin:5px 0 12px}#cheatToggle{min-width:110px}#cheatToggle.on{background:#4c9b76;border-color:#6fc39a}#cheatToggle.off{background:#8c3834;border-color:#bd625c}.cheatbox{border:1px dashed #6f5a33;border-radius:6px;padding:11px;margin:5px 0 12px;background:#1d2419}.checkline{display:flex;align-items:center;gap:8px;margin:8px 0}.checkline input{width:auto;margin:0}.gameover{background:#2b1f14;border:1px solid var(--gold);border-radius:8px;padding:15px;margin-bottom:15px;text-align:center}.gameover b{color:var(--gold);font-size:19px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.statgrid{grid-template-columns:repeat(3,1fr)}.split{grid-template-columns:1fr}}
+</style></head><body>
+<div class="top"><div class="brand">SUPREMACY <span style="color:#e8edf0">WORLD WAR</span></div><div class="muted small">GRANDE STRATÉGIE · 1914 · 210 PROVINCES · 10 NATIONS</div></div>
+<div class="wrap">
+<section id="lobby" class="hero panel"><h1>WORLD WAR</h1><p class="muted">Commandez une nation. Développez votre économie. Formez des alliances. Écrivez l'histoire.</p>
+<div class="split">
+<div class="side creator"><span class="rolechip">MODE CRÉATEUR</span><h3>Créer une partie</h3>
+<label>Votre nom de commandant</label><input id="hostName" maxlength="22" value="Commandant">
+<h4 class="muted" style="margin:14px 0 4px">Paramètres de la partie</h4>
+<div class="cheatrow"><div><b>Triche</b><div class="muted small">Débloque le panneau de commandes du créateur en jeu</div></div><button id="cheatToggle" class="off">Désactivée</button></div>
+<div id="cheatSettings" class="hidden cheatbox"><h4 style="margin:0 0 8px">Paramètres supplémentaires (triche activée)</h4><label>Réserves d'argent supplémentaires (par province du créateur)</label><input id="startMoney" type="number" min="0" max="99999" value="5000"><label>Avantage du créateur</label><select id="hostBonus"><option value="0">Aucun</option><option value="15">Réserves de départ ×1.5</option><option value="2">Réserves de départ ×2</option></select><p class="muted small">Ces options ne sont disponibles que parce que la triche est activée.</p></div>
+<button class="primary" id="create">Créer la partie</button>
+<p class="muted small" id="createHint">Active la triche pour débloquer les paramètres supplémentaires et le panneau de commandes en jeu.</p></div>
+<div class="side joiner"><span class="rolechip">MODE JOUEUR</span><h3>Rejoindre une partie</h3>
+<label>Nom du commandant</label><input id="joinName" maxlength="22" placeholder="Votre nom">
+<label>Code d'invitation</label><input id="joinCode" maxlength="6" placeholder="ABC123">
+<button id="join">Rejoindre</button>
+<p class="muted small">Demande le code ou le lien au créateur de la partie. Une fois dans la partie, choisis une nation et attends le lancement.</p></div>
+</div><p id="lobbyError" class="muted"></p></section>
+<section id="game" class="hidden"><div class="row"><div><h2 id="roomTitle">Partie</h2><span class="tag" id="day">Jour 1</span> <span class="tag" id="playersCount">1/10 joueurs</span> <span class="tag" id="provCount">210 provinces</span></div><div style="text-align:right"><button id="copyInvite">Copier le lien d'invitation</button> <button id="leave">Quitter l'affichage</button></div></div>
+<div id="gameover" class="gameover hidden"></div>
+<div class="panel"><div class="muted small">INVITATION PRIVÉE</div><div class="invite" id="inviteUrl"></div><p class="muted small">Partage ce lien ou le code de partie à tes amis. Le serveur doit rester en ligne pour que la partie soit accessible.</p></div>
+<div class="panel"><h3>Trésor national</h3><div class="statgrid" id="resources"></div></div>
+<div class="layout"><main>
+<div class="panel"><div class="row"><h3>Carte stratégique mondiale</h3><div style="text-align:right" class="muted small" id="mapHint">Clique une province pour la sélectionner</div></div><div id="map" class="map-world"></div><div class="row" id="legend" style="margin-top:10px"></div></div>
+<div class="panel hidden" id="provPanel"><h3 id="provTitle">Province</h3><div class="muted small" id="provDetails"></div></div>
+<div class="panel hidden" id="attackPanel"><h3>Ordre d'attaque</h3><div class="row"><div><label>Province de départ (à toi)</label><select id="atkFrom"></select></div><div><label>Cible adjacente</label><select id="atkTo"></select></div></div><div class="row"><div><label>Part de la garnison envoyée</label><select id="atkFraction"><option value="0.4">40 %</option><option value="0.5">50 %</option><option value="0.6" selected>60 %</option><option value="0.7">70 %</option><option value="0.8">80 %</option><option value="0.9">90 %</option></select></div><div style="display:flex;align-items:flex-end"><button class="primary" id="attack">⚔️ Lancer l'attaque</button></div></div><div class="muted small" id="atkInfo"></div></div>
+<div class="panel"><h3>Ordres militaires et construction</h3><div class="row"><div><label>Recrutement</label><select id="unit"><option value="infantry">Infanterie</option><option value="artillery">Artillerie</option><option value="tanks">Chars</option><option value="aircraft">Avions</option><option value="ships">Navires (port requis)</option></select><input id="unitAmount" type="number" min="1" max="1000" value="100"><label>Province</label><select id="recruitProv"></select><button id="recruit">Recruter</button></div><div><label>Construction</label><select id="building"><option value="barracks">Caserne</option><option value="factory">Usine</option><option value="port">Port</option><option value="railway">Gare</option><option value="fort">Fort</option></select><label>Province</label><select id="buildProv"></select><button id="build">Construire</button></div></div></div>
+<div class="panel"><h3>Journal de guerre</h3><div class="log" id="log"></div></div></main>
+<aside><div class="panel"><h3>Choisir une nation</h3><div id="nations"></div><p class="muted small">Une nation ne peut être commandée que par un joueur.</p><div class="checkline hidden" id="botsRow"><input type="checkbox" id="botsFill" checked><label for="botsFill" class="muted small" style="margin:0">Remplacer les nations vides par des IA</label></div><button id="start" class="primary hidden">Lancer la partie</button></div>
+<div id="admin" class="panel admin hidden"><h3>⚙ Commandes du créateur (triche)</h3><p class="muted small">Panneau privé : seul le créateur peut l'utiliser, et seulement si la triche était activée à la création.</p><label>Joueur cible</label><select id="adminTarget"></select><label>Type de commande</label><select id="adminKind"><option value="troops">Ajouter des troupes</option><option value="vehicle">Ajouter des véhicules</option><option value="resource">Ajouter des ressources</option><option value="building">Ajouter un bâtiment</option><option value="province">Offrir des provinces</option></select><label>Quantité</label><input id="adminAmount" type="number" value="1000" min="1"><label>Ressource (si applicable)</label><select id="adminResource"><option value="money">Argent</option><option value="food">Nourriture</option><option value="wood">Bois</option><option value="iron">Fer</option><option value="oil">Pétrole</option><option value="coal">Charbon</option></select><label>Unité / véhicule</label><select id="adminUnit"><option value="infantry">Infanterie</option><option value="artillery">Artillerie</option><option value="tanks">Chars</option><option value="aircraft">Avions</option><option value="ships">Navires</option></select><label>Bâtiment</label><select id="adminBuilding"><option value="factory">Usine</option><option value="barracks">Caserne</option><option value="port">Port</option><option value="railway">Gare</option><option value="fort">Fort</option></select><button class="danger" id="adminApply">Appliquer la commande</button></div>
+<div class="panel"><h3>Joueurs</h3><div id="players"></div></div></aside></div></section></div>
+<script src="/socket.io/socket.io.js"></script><script>
+let socket=null,hostToken=null,roomCode=null,state=null,cheatsOn=false,selectedProvince=null;
+const $=id=>document.getElementById(id);
+const RES_NAMES={food:"Nourriture",wood:"Bois",iron:"Fer",oil:"Pétrole",coal:"Charbon",money:"Argent"};
+const UNIT_LABELS={infantry:"Infanterie",artillery:"Artillerie",tanks:"Chars",aircraft:"Avions",ships:"Navires"};
+const BUILD_LABELS={barracks:"Caserne",factory:"Usine",port:"Port",railway:"Gare",fort:"Fort"};
+function showGame(){ $("lobby").classList.add("hidden");$("game").classList.remove("hidden");}
+function err(m){$("lobbyError").textContent=m;alert(m);}
+if(typeof io==="undefined"){$("lobbyError").textContent="Erreur : serveur de jeu introuvable (socket.io non chargé). Ce fichier doit être servi par le serveur Node.js du jeu — ouvert seul, le jeu ne peut pas fonctionner.";document.querySelectorAll("#lobby button").forEach(b=>b.disabled=true);}
+$("cheatToggle").onclick=()=>{cheatsOn=!cheatsOn;$("cheatToggle").textContent=cheatsOn?"Activée":"Désactivée";$("cheatToggle").className=cheatsOn?"on":"off";$("cheatSettings").classList.toggle("hidden",!cheatsOn);};
+$("create").onclick=()=>{if(!socket)return;socket.emit("createGame",{name:$("hostName").value||"Commandant",cheats:cheatsOn,settings:cheatsOn?{startMoney:Number($("startMoney").value)||0,hostBonus:Number($("hostBonus").value)||0}:null});};
+$("join").onclick=()=>{if(!socket)return;socket.emit("joinGame",{name:$("joinName").value||"Commandant",code:$("joinCode").value});};
+$("copyInvite").onclick=async()=>{await navigator.clipboard.writeText(location.origin+"?join="+roomCode);$("copyInvite").textContent="Lien copié !";};
+$("leave").onclick=()=>{location.href=location.pathname;};
+$("start").onclick=()=>{if(!socket)return;socket.emit("startGame",{hostToken,bots:$("botsFill").checked});};
+$("recruit").onclick=()=>{if(!socket)return;socket.emit("recruit",{unit:$("unit").value,amount:$("unitAmount").value,provinceId:$("recruitProv").value});};
+$("build").onclick=()=>{if(!socket)return;socket.emit("build",{building:$("building").value,provinceId:$("buildProv").value});};
+$("attack").onclick=()=>{if(!socket||!state||!state.started)return;socket.emit("attack",{from:$("atkFrom").value,to:$("atkTo").value,fraction:Number($("atkFraction").value)});};
+$("atkFrom").onchange=()=>{renderTargets();render();};
+$("adminApply").onclick=()=>{if(!socket||!state||state.cheats!==true)return;socket.emit("adminAction",{hostToken,kind:$("adminKind").value,amount:$("adminAmount").value,targetId:$("adminTarget").value,resource:$("adminResource").value,unit:$("adminUnit").value,building:$("adminBuilding").value});};
+if(typeof io!=="undefined"){
+socket=io();
+socket.on("created",d=>{roomCode=d.code;hostToken=d.hostToken;showGame();});
+socket.on("errorMessage",err);
+socket.on("connect_error",m=>{$("lobbyError").textContent="Connexion au serveur impossible : "+m;});
+socket.on("state",s=>{state=s;roomCode=s.code;showGame();render();});
+}
+function myNationId(){const me=state&&state.players.find(p=>p.id===socket.id);return me?me.nation:null;}
+function colorOf(nationId){const n=state.nations.find(x=>x.id===nationId);return n?n.color:"#5c7080";}
+function flagOf(nationId){const n=state.nations.find(x=>x.id===nationId);return n?n.flag:"🏳️";}
+function nameOf(nationId){const n=state.nations.find(x=>x.id===nationId);return n?n.name:nationId;}
+function render(){
+$("roomTitle").textContent="Campagne mondiale · "+state.code;$("day").textContent="Jour "+state.day;$("playersCount").textContent=state.players.filter(p=>!p.bot).length+"/10 joueurs"+(state.players.some(p=>p.bot)?" + IA":"");$("provCount").textContent=state.provinces.length+" provinces";
+$("inviteUrl").textContent=location.origin+location.pathname+"?join="+state.code;
+const tre=state.treasury&&state.treasury[socket.id];
+$("resources").innerHTML=Object.keys(RES_NAMES).map(k=>`<div class="stat"><span class="muted">${RES_NAMES[k]}</span><b>${tre?Math.floor(tre[k]).toLocaleString("fr-FR"):"—"}</b></div>`).join("");
+const myN=myNationId();
+$("nations").innerHTML=state.nations.map(n=>`<div class="nation"><span><span class="dot" style="background:${n.color}"></span>${n.flag} ${n.name}</span><span>${n.player?(state.players.find(p=>p.id===n.player)?.name||"Réservé"):"<button data-nation='"+n.id+"'>Choisir</button>"}</span></div>`).join("");
+document.querySelectorAll("[data-nation]").forEach(b=>b.onclick=()=>socket.emit("chooseNation",{nationId:b.dataset.nation}));
+const fromId=$("atkFrom")?$("atkFrom").value:null;
+$("map").innerHTML=state.provinces.map(p=>{
+let cls="prov";let style=`left:${p.x/10}%;top:${p.y/5}%;background:${colorOf(p.owner)}`;
+if(p.owner===myN)style+=";border-color:#fff";
+if(selectedProvince===p.id)cls+=" selected";
+if(fromId&&state.adjacency[fromId]&&state.adjacency[fromId].includes(p.id)&&p.owner!==myN)cls+=" prov-dst";
+if(fromId===p.id)cls+=" prov-src";
+return `<button class="${cls}" style="${style}" data-prov="${p.id}" title="${p.name} (${flagOf(p.owner)} ${nameOf(p.owner)}) — ${Object.values(p.units).reduce((a,b)=>a+b,0)} unités"></button>`}).join("");
+document.querySelectorAll("[data-prov]").forEach(b=>b.onclick=()=>{selectedProvince=b.dataset.prov;render();});
+$("legend").innerHTML=state.nations.map(n=>{const cnt=state.provinces.filter(p=>p.owner===n.id).length;return `<span class="tag" style="border-left:3px solid ${n.color}">${n.flag} ${n.name} : <b>${cnt}</b></span>`}).join(" ");
+const sp=state.provinces.find(p=>p.id===selectedProvince);
+$("provPanel").classList.toggle("hidden",!sp);
+if(sp){$("provTitle").textContent=sp.flag+" "+sp.name;$("provDetails").innerHTML=`Contrôlée par <b style="color:${colorOf(sp.owner)}">${nameOf(sp.owner)}</b> · Population ${sp.population.toLocaleString("fr-FR")}<br>Unités : ${Object.entries(sp.units).filter(([,v])=>v>0).map(([k,v])=>UNIT_LABELS[k]+" "+v.toLocaleString("fr-FR")).join(", ")||"aucune"}<br>Bâtiments : ${Object.entries(sp.buildings).filter(([,v])=>v>0).map(([k,v])=>BUILD_LABELS[k]+" ×"+v).join(", ")||"aucun"}`;}
+$("players").innerHTML=state.players.map(p=>`<div class="nation"><span>${p.name}${p.host?" ★":""}${p.bot?" 🤖":""}</span><span>${p.online?"●":"○"} ${p.nation===null?"Sans nation":flagOf(p.nation)+" "+nameOf(p.nation)}</span></div>`).join("");
+$("log").innerHTML=state.log.slice().reverse().map(x=>`<div>${new Date(x.time).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})} · ${x.msg}</div>`).join("");
+const isHost=!!hostToken;const canCheat=isHost&&state.cheats===true;$("admin").classList.toggle("hidden",!canCheat);$("start").classList.toggle("hidden",!isHost||state.started);$("botsRow").classList.toggle("hidden",!isHost||state.started);
+$("attackPanel").classList.toggle("hidden",!state.started||state.over||myN===null);
+if(state.started&&myN!==null){renderProvinceSelects();renderTargets();}
+$("gameover").classList.toggle("hidden",!state.over);
+if(state.over)$("gameover").innerHTML=`🏆 <b>${state.winner} remporte la partie !</b><br><span class="muted">Objectif de ${state.winTarget} provinces atteint (jour ${state.day}).</span>`;
+$("adminTarget").innerHTML=state.players.map(p=>`<option value="${p.id}">${p.name}</option>`).join("");
+}
+function renderProvinceSelects(){
+const myN=myNationId();if(myN===null)return;
+const mine=state.provinces.filter(p=>p.owner===myN);
+const keep1=$("recruitProv").value,keep2=$("buildProv").value;
+$("recruitProv").innerHTML=mine.map(p=>`<option value="${p.id}" ${p.id===keep1?"selected":""}>${p.name}</option>`).join("");
+$("buildProv").innerHTML=mine.map(p=>`<option value="${p.id}" ${p.id===keep2?"selected":""}>${p.name}</option>`).join("");
+}
+function renderTargets(){
+if(!state.adjacency)return;
+const myN=myNationId();
+const fromId=$("atkFrom").value;
+const src=state.provinces.find(p=>p.id===fromId&&p.owner===myN);
+const targets=src?(state.adjacency[fromId]||[]).map(t=>state.provinces.find(p=>p.id===t)).filter(p=>p&&p.owner!==myN):[];
+$("atkTo").innerHTML=targets.map(p=>`<option value="${p.id}" ${selectedProvince===p.id?"selected":""}>${p.name} — ${flagOf(p.owner)} ${nameOf(p.owner)}</option>`).join("");
+const mine=state.provinces.filter(p=>p.owner===myN);
+$("atkInfo").textContent=`${mine.length} province(s) sous ton contrôle · cibles depuis ${src?src.name:"—"} : ${targets.length}`;
+}
+const params=new URLSearchParams(location.search);if(params.get("join")){$("joinCode").value=params.get("join");$("joinName").focus();}
+</script></body></html>
