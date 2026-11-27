@@ -93,7 +93,7 @@ if(selectedProvince===p.id)cls+=" selected";
 if(fromId&&state.adjacency[fromId]&&state.adjacency[fromId].includes(p.id)&&p.owner!==myN)cls+=" prov-dst";
 if(fromId===p.id)cls+=" prov-src";
 return `<button class="${cls}" style="${style}" data-prov="${p.id}" title="${p.name} (${flagOf(p.owner)} ${nameOf(p.owner)}) — ${totalUnits(p).toLocaleString("fr-FR")} unités">${buildingIcons(p)}<span class="cnt">${fmtUnits(totalUnits(p))}</span></button>`}).join("");
-document.querySelectorAll("[data-prov]").forEach(b=>b.onclick=()=>{selectedProvince=b.dataset.prov;render();});
+document.querySelectorAll("[data-prov]").forEach(b=>b.onclick=()=>{selectedProvince=b.dataset.prov;const cp=state.provinces.find(x=>x.id===selectedProvince);if(cp&&cp.owner===myNationId()){$("atkFrom").value=cp.id;$("moveFrom").value=cp.id;}render();});
 $("legend").innerHTML=state.nations.map(n=>{const cnt=state.provinces.filter(p=>p.owner===n.id).length;return `<span class="tag" style="border-left:3px solid ${n.color}">${n.flag} ${n.name} : <b>${cnt}</b></span>`}).join(" ");
 const sp=state.provinces.find(p=>p.id===selectedProvince);
 $("provPanel").classList.toggle("hidden",!sp);
@@ -106,7 +106,9 @@ if(state.started&&myN!==null){renderProvinceSelects();renderTargets();renderMove
 $("movePanel").classList.toggle("hidden",!state.started||state.over||myN===null);
 $("gameover").classList.toggle("hidden",!state.over);
 if(state.over)$("gameover").innerHTML=`🏆 <b>${state.winner} remporte la partie !</b><br><span class="muted">Objectif de ${state.winTarget} provinces atteint (jour ${state.day}).</span>`;
+const keepAdminTarget=$("adminTarget").value;
 $("adminTarget").innerHTML=state.players.map(p=>`<option value="${p.id}">${p.name}</option>`).join("");
+if(keepAdminTarget&&state.players.some(p=>p.id===keepAdminTarget))$("adminTarget").value=keepAdminTarget;
 const tgtNation=(state.players.find(p=>p.id===$("adminTarget").value)||{}).nation;
 $("adminProvince").innerHTML=state.provinces.filter(p=>p.owner===tgtNation).map(p=>`<option value="${p.id}">${p.name}</option>`).join("")||"<option value=''>Aucune province</option>";
 }
@@ -117,7 +119,8 @@ const keepF=$("moveFrom").value;
 $("moveFrom").innerHTML=mine.map(p=>`<option value="${p.id}" ${p.id===keepF?"selected":""}>${p.name} (${fmtUnits(totalUnits(p))} unités)</option>`).join("");
 const src=state.provinces.find(p=>p.id===$("moveFrom").value);
 const near=src?(state.adjacency[src.id]||[]).map(t=>state.provinces.find(p=>p.id===t)).filter(p=>p&&p.owner===myN):[];
-$("moveTo").innerHTML=near.map(p=>`<option value="${p.id}">${p.name} (${fmtUnits(totalUnits(p))} unités)</option>`).join("")||"<option value=''>— aucune province alliée adjacente —</option>";
+const keepT=$("moveTo").value;
+$("moveTo").innerHTML=near.map(p=>`<option value="${p.id}" ${p.id===keepT?"selected":""}>${p.name} (${fmtUnits(totalUnits(p))} unités)</option>`).join("")||"<option value=''>— aucune province alliée adjacente —</option>";
 $("moveInfo").textContent=`${mine.length} province(s) à toi · ${near.length} destination(s) possible(s) depuis ${src?src.name:"—"} (garnison : ${src?totalUnits(src).toLocaleString("fr-FR"):0} unités)`;
 }
 function renderProvinceSelects(){
@@ -130,11 +133,16 @@ $("buildProv").innerHTML=mine.map(p=>`<option value="${p.id}" ${p.id===keep2?"se
 function renderTargets(){
 if(!state.adjacency)return;
 const myN=myNationId();
+const mine=state.provinces.filter(p=>p.owner===myN);
+const isBorder=p=>(state.adjacency[p.id]||[]).some(t=>{const q=state.provinces.find(x=>x.id===t);return q&&q.owner!==myN;});
+const keepFrom=$("atkFrom").value;
+const ordered=mine.slice().sort((a,b)=>(isBorder(a)===isBorder(b))?0:(isBorder(a)?-1:1));
+$("atkFrom").innerHTML=ordered.map(p=>`<option value="${p.id}" ${p.id===keepFrom?"selected":""}>${p.name} (${fmtUnits(totalUnits(p))} unités)</option>`).join("")||"<option value=''>— aucune province à toi —</option>";
 const fromId=$("atkFrom").value;
 const src=state.provinces.find(p=>p.id===fromId&&p.owner===myN);
-const targets=src?(state.adjacency[fromId]||[]).map(t=>state.provinces.find(p=>p.id===t)).filter(p=>p&&p.owner!==myN):[];
-$("atkTo").innerHTML=targets.map(p=>`<option value="${p.id}" ${selectedProvince===p.id?"selected":""}>${p.name} — ${flagOf(p.owner)} ${nameOf(p.owner)}</option>`).join("");
-const mine=state.provinces.filter(p=>p.owner===myN);
+const keepTo=$("atkTo").value;
+const targets=src?(state.adjacency[src.id]||[]).map(t=>state.provinces.find(p=>p.id===t)).filter(p=>p&&p.owner!==myN):[];
+$("atkTo").innerHTML=targets.map(p=>`<option value="${p.id}" ${(p.id===keepTo||selectedProvince===p.id)?"selected":""}>${p.name} — ${flagOf(p.owner)} ${nameOf(p.owner)} (${fmtUnits(totalUnits(p))})</option>`).join("")||"<option value=''>— aucune cible ennemie adjacente —</option>";
 $("atkInfo").textContent=`${mine.length} province(s) sous ton contrôle · cibles depuis ${src?src.name:"—"} : ${targets.length}`;
 }
 const params=new URLSearchParams(location.search);if(params.get("join")){$("joinCode").value=params.get("join");$("joinName").focus();}
