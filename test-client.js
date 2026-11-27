@@ -62,6 +62,18 @@ async function main() {
   await wait(300);
   check(playerState.provinces.find(p => p.id === "france_1").buildings.barracks === 2, "construction d'une deuxième caserne");
 
+  const frAlly = playerState.adjacency["france_1"].map(t => playerState.provinces.find(p => p.id === t)).find(p => p.owner === "france");
+  check(!!frAlly, "une province alliée est adjacente à france_1 (déplacement possible)");
+  const srcBefore = playerState.provinces.find(p => p.id === "france_1").units.infantry;
+  const dstBefore = frAlly.units.infantry;
+  player.emit("move", { from: "france_1", to: frAlly.id, unit: "infantry", amount: 50 });
+  await wait(300);
+  const mvSrc = playerState.provinces.find(p => p.id === "france_1"), mvDst = playerState.provinces.find(p => p.id === frAlly.id);
+  check(mvSrc.units.infantry === srcBefore - 50 && mvDst.units.infantry === dstBefore + 50, "déplacement : 50 infanteries passent de france_1 à " + frAlly.name);
+  player.emit("move", { from: "france_1", to: "japan_1", unit: "infantry", amount: 10 });
+  const errMove = await waitFor(player, "errorMessage");
+  check(!!errMove, "déplacement vers une province non alliée/adjacente refusé");
+
   const frWithBorder = playerState.provinces.find(p => p.owner === "france" && playerState.adjacency[p.id].some(t => playerState.provinces.find(q => q.id === t).owner !== "france"));
   check(!!frWithBorder, "la France possède au moins une province frontalière");
   const target = playerState.adjacency[frWithBorder.id].map(t => playerState.provinces.find(p => p.id === t)).filter(p => p.owner !== "france").sort((a, b) => a.units.infantry - b.units.infantry)[0];
@@ -83,6 +95,11 @@ async function main() {
   host.emit("adminAction", { hostToken, kind: "resource", amount: 1000, targetId: adminTarget, resource: "oil" });
   await wait(300);
   check(playerState.treasury[adminTarget].oil >= oilBefore + 1000, "action de triche : pétrole ajouté au trésor du joueur cible");
+
+  const artyBefore = playerState.provinces.find(p => p.id === "france_3").units.artillery;
+  host.emit("adminAction", { hostToken, kind: "troops", amount: 10, targetId: adminTarget, unit: "artillery", provinceId: "france_3" });
+  await wait(300);
+  check(playerState.provinces.find(p => p.id === "france_3").units.artillery === artyBefore + 10, "triche 'troupes' ciblée : +10 artilleries dans france_3 (province choisie)");
 
   player.emit("adminAction", { hostToken: "faux", kind: "resource", amount: 1000, targetId: adminTarget, resource: "money" });
   const err2 = await waitFor(player, "errorMessage");

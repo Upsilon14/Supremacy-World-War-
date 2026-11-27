@@ -340,8 +340,36 @@ io.on("connection", socket => {
     broadcast(io, room);
   });
 
+  socket.on("move", ({ from, to, unit, amount } = {}) => {
+    if (!room || !room.started || room.over) return socket.emit("errorMessage", "La partie n'a pas encore commencé.");
+    const nationId = playerNation(room, socket.id);
+    if (!nationId) return socket.emit("errorMessage", "Choisis d'abord une nation.");
+    const src = room.provinces.find(p => p.id === from), dst = room.provinces.find(p => p.id === to);
+    if (!src || !dst) return socket.emit("errorMessage", "Province inconnue.");
+    if (src.owner !== nationId) return socket.emit("errorMessage", `Vous ne contrôlez pas ${src.name}.`);
+    if (dst.owner !== nationId) return socket.emit("errorMessage", `La destination ${dst.name} doit vous appartenir.`);
+    if (src.id === dst.id) return socket.emit("errorMessage", "Choisissez deux provinces différentes.");
+    if (!room.adjacency[src.id] || !room.adjacency[src.id].includes(dst.id)) return socket.emit("errorMessage", `${dst.name} n'est pas adjacente à ${src.name}.`);
+    const moved = {};
+    if (unit === "all") {
+      for (const [k, v] of Object.entries(src.units)) if (v > 0) moved[k] = v;
+    } else {
+      if (!(unit in src.units)) return socket.emit("errorMessage", "Unité inconnue.");
+      const n = Math.max(1, Math.min(1000000, Math.floor(Number(amount) || 0)));
+      if (src.units[unit] < n) return socket.emit("errorMessage", `Seulement ${src.units[unit]} ${UNIT_LABELS[unit] || unit} disponibles à ${src.name}.`);
+      moved[unit] = n;
+    }
+    const total = unitsCount(moved);
+    if (total === 0) return socket.emit("errorMessage", "Aucune unité à déplacer.");
+    subtractUnits(src, moved);
+    addUnits(dst, moved);
+    const pname = room.players.find(p => p.id === socket.id)?.name;
+    addLog(room, `🚚 ${pname} déplace ${total} unités de ${src.name} vers ${dst.name}.`);
+    broadcast(io, room);
+  });
+
   socket.on("adminAction", payload => {
-    const { hostToken, kind, amount, targetId, resource, unit, building } = payload || {};
+    const { hostToken, kind, amount, targetId, resource, unit, building, provinceId } = payload || {};
     if (!room || hostToken !== room.hostToken) return socket.emit("errorMessage", "Commande réservée au créateur.");
     if (room.cheats !== true) return socket.emit("errorMessage", "La triche est désactivée pour cette partie.");
     const target = room.players.find(p => p.id === targetId);
@@ -355,12 +383,14 @@ io.on("connection", socket => {
       addLog(room, `[Triche] +${n} ${RESOURCE_NAMES[k]} pour ${target.name}.`);
     } else if (kind === "troops" || kind === "vehicle") {
       const u = Object.keys(UNIT_COSTS).includes((unit || "").toLowerCase()) ? unit.toLowerCase() : "infantry";
-      provs[0].units[u] += n;
-      addLog(room, `[Triche] +${n} ${UNIT_LABELS[u]} pour ${target.name} à ${provs[0].name}.`);
+      const tp = (provinceId && provs.find(p => p.id === provinceId)) || provs[0];
+      tp.units[u] += n;
+      addLog(room, `[Triche] +${n} ${UNIT_LABELS[u]} pour ${target.name} à ${tp.name}.`);
     } else if (kind === "building") {
       const b = Object.keys(BUILD_COSTS).includes((building || "").toLowerCase()) ? building.toLowerCase() : "fort";
-      provs[0].buildings[b] += 1;
-      addLog(room, `[Triche] ${BUILD_LABELS[b]} offert à ${target.name} à ${provs[0].name}.`);
+      const tp = (provinceId && provs.find(p => p.id === provinceId)) || provs[0];
+      tp.buildings[b] += 1;
+      addLog(room, `[Triche] ${BUILD_LABELS[b]} offert à ${target.name} à ${tp.name}.`);
     } else if (kind === "province") {
       const others = room.provinces.filter(p => p.owner !== target.nation);
       const k = Math.min(others.length, n);

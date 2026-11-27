@@ -31,12 +31,18 @@ Puis ouvrir http://localhost:3000
 - Bâtiments : caserne, usine, port, gare, fort (défense ×1,4).
 - Attaque : fraction (10–90 %) de la garnison d'une province adjacente ;
   puissance aléatoire ±25 %, les survivants d'un échec rentrent à 50 %.
+- Déplacement : transfert d'unités (par type ou toute la garnison) entre deux
+  de ses provinces adjacentes — utile pour masser ou séparer les troupes.
+- Carte : fond de Terre stylisé, icônes de bâtiments sur chaque province
+  (🏰 caserne, 🏭 usine, ⚓ port, 🚉 gare, 🏯 fort) et effectif affiché sous
+  chaque province (il fond lors des combats).
 - **Victoire** : contrôler **150 provinces** sur 210.
 
 ## Commandes de triche (créateur, si activées à la création)
 
-Troupes, véhicules, ressources (vers le trésor), bâtiment, et « Offrir des
-provinces » (transfert immédiat, déclenche la vérification de victoire).
+Troupes, véhicules, ressources (vers le trésor), bâtiment — avec **choix de la
+province cible** — et « Offrir des provinces » (transfert immédiat, déclenche
+la vérification de victoire).
 
 ## Variables d'environnement
 
@@ -60,7 +66,8 @@ PORT=3100 DAY_MS=5000 node server.js &
 node test-client.js
 ```
 
-22 vérifications : création/rejointe, carte 210 provinces / 10 nations, choix
+26 vérifications : création/rejointe, carte 210 provinces / 10 nations, choix
 de nation, lancement avec IA, trésor national, recrutement, construction,
-combat et adjacence, triche activée/désactivée, refus des commandes par un
+déplacement (y compris refus hors adjacence), combat et adjacence, triche
+activée/désactivée, triche ciblée par province, refus des commandes par un
 non-créateur, transfert de provinces et détection de la victoire.
